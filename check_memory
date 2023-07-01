@@ -1,8 +1,7 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 
-#### Author : Taha Ali
-#### Created: 09/01/2015
-#### Contact: tahazohair@gmail.com
+#### Original Author : Taha Ali
+#### Additional Author: Lukas Grützmacher
 ###
 ##
 # Summary: this is script or program calculates how much total memory is available.
@@ -45,6 +44,9 @@ parser.add_option('-w', '--warning',
 critical = options.critical
 warning = options.warning
 
+if critical < warning:
+    warning = critical
+
 with open('/proc/meminfo', 'r') as memfile:
     entry = {}
     for line in memfile:
@@ -63,18 +65,18 @@ total = int(entry['MemTotal'])
 def mem_load():
     # change to percentage
     use_percent = 100 - ((free * 100) / total)
+    performance_data = "|mem={:.1f}%;{:.0f};{:.0f};{:.0f}".format(use_percent, warning, critical, use_percent)
     if use_percent >= critical:
-        print "CRITICAL: memory (ram) over", use_percent, '%', "used"
-        sys.exit(CRIT)
+        print ("CRITICAL: memory (ram) over", use_percent, '%', "used", performance_data)
+        raise SystemExit(CRIT)
     elif warning <= use_percent < critical:
-        print "WARNING: memory (ram) over", use_percent, '%', "used"
-        sys.exit(WARN)
+        print ("WARNING: memory (ram) over", use_percent, '%', "used", performance_data)
+        raise SystemExit(WARN)
     elif use_percent < warning:
-        print "OK: memory is only", use_percent, '%', "used"
-        sys.exit(OK)
+        print ("OK: memory is only", use_percent, '%', "used", performance_data)
+        raise SystemExit(OK)
     else:
         print ("UNKNOWN: unable to process free memory\n", use_percent)
-        sys.exit(UNKNOWN)
-
+        raise SystemExit(UNKNOWN)
 
 mem_load()
